@@ -10,6 +10,7 @@ const baraatImageAsset = { url: "/media/baraat.webp" };
 const receptionImageAsset = { url: "/media/reception.webp" };
 const phereImageAsset = { url: "/media/mandap.webp" };
 const introVideoWebm = { url: "/media/intro.webm" };
+const introVideoMp4 = { url: "/media/intro.mp4" };
 const ganpatiLogo = { url: "/media/ganpati-logo.svg" };
 const lotusBottom = { url: "/media/lotus-bottom.png" };
 
@@ -194,6 +195,7 @@ function InvitationExperience({ children }: { children: ReactNode }) {
             }}
           >
             <source src={introVideoWebm.url} type="video/webm" />
+            <source src={introVideoMp4.url} type="video/mp4" />
           </video>
         </div>
       )}
