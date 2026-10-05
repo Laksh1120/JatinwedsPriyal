@@ -357,6 +357,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   padding-top:0;
 }
 .framed-invitation__scroll::-webkit-scrollbar { display:none; }
+.scroll-hint { position:absolute; left:50%; bottom:calc(2.5rem + 42px); z-index:2; display:flex; flex-direction:column; align-items:center; gap:.4rem; transform:translateX(-50%); pointer-events:none; opacity:0; transition:opacity .5s ease; font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; font-size:.95rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:#FFF8F0; text-shadow:0 1px 3px rgba(60,30,30,.55),0 0 8px rgba(60,30,30,.35); }
+.scroll-hint__hand { filter:drop-shadow(0 1px 3px rgba(60,30,30,.55)); }
+.scroll-hint--visible { opacity:1; }
+.scroll-hint__hand { width:2.25rem; height:2.25rem; animation:scroll-hint-swipe 1.6s ease-in-out infinite; }
+@keyframes scroll-hint-swipe { 0%,100% { transform:translateY(.6rem); } 50% { transform:translateY(-.9rem); } }
 .framed-invitation__content { opacity:0; transform:translateY(12px); }
 .invitation-experience--transition .framed-invitation__content { animation:card-content-in .6s ease 1.4s forwards; }
 .invitation-experience--final .framed-invitation__content { opacity:1; transform:translateY(0); }
@@ -425,7 +430,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .invitation-name--groom { max-width:100%; }
 .invitation-family { width:min(100%,26rem); margin-top:.65rem; margin-inline:auto; font-family:var(--font-invitation); font-size:clamp(.9625rem,4.2cqw,1.0825rem); line-height:1.52; color:var(--invitation-muted); text-align:center; text-wrap:balance; }
 .invitation-family p + p { margin-top:.22rem; }
-.invitation-ampersand { margin-block:-1rem; font-family:var(--font-script); font-size:2rem; line-height:1; color:var(--gold); }
+.invitation-ampersand { margin-block:-1rem; font-family:var(--font-script); font-size:calc(clamp(37px,13.2cqw,70px) - 4pt); font-weight:400; line-height:.94; color:var(--gold); }
 .lotus-top { --lotus-scale:.72; --lotus-lift:calc(-3% + 1px); --lotus-sway:3.5deg; position:absolute; inset:0 0 auto; z-index:2; width:100%; height:0; margin-top:var(--lotus-lift); pointer-events:none; }
 .lotus-top__item { position:absolute; top:0; left:calc((var(--l) + var(--w) * (1 - var(--lotus-scale)) / 2) * 1%); width:calc(var(--w) * var(--lotus-scale) * 1%); transform-origin:top center; animation:floral-sway 5s ease-in-out var(--delay) infinite alternate; pointer-events:none; }
 .lotus-item--held { animation-play-state:paused; }
@@ -441,6 +446,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .invitation-reveal { opacity:0; transform:translateY(12px); animation:invitation-reveal .8s ease forwards; }
 .invitation-reveal--1 { animation-delay:.1s; }.invitation-reveal--2 { animation-delay:.25s; }.invitation-reveal--3 { animation-delay:.4s; }.invitation-reveal--4 { animation-delay:.55s; }.invitation-reveal--5 { animation-delay:.7s; }
 @keyframes invitation-reveal { to { opacity:1; transform:translateY(0); } }
+/* Page-1 text: three beats 0.3s apart, each fading in over 0.4s (~1s total). */
+.invitation-stage { opacity:0; }
+.invitation-stage--in { animation:invitation-reveal .4s ease calc(var(--stage) * .3s) forwards; }
 @keyframes floral-sway { from { transform:rotate(calc(var(--lotus-sway) * -1)); } to { transform:rotate(var(--lotus-sway)); } }
 
 .count-card {
@@ -470,7 +478,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .count-card .lbl { display:block; margin-top:.85rem; font-size:.72rem; text-transform:uppercase; letter-spacing:.22em; color:var(--muted-foreground); }
 #event .section-heading { padding-top:0; }
 /* Countdown: nudge the bottom gold line up ~18px; otherwise equal-length like the other pages. */
-#event.page-pin { min-height:calc(var(--page-len) - 18px); }
+#event.page-pin { min-height:calc(var(--page-len) - 18px); padding-top:calc(1.625rem + 30px); }
 
 
 .checker-section,.checker-footer { position:relative; background:transparent; }
@@ -504,11 +512,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .foil-frame::after { bottom:0; }
 .checker-footer::after { bottom:-6px; }
 .foil-frame + .foil-frame::before { display:none; }
-.footer-note { --footer-gap:2rem; --footer-rise:14px; --footer-duration:.9s; --footer-stagger:220ms; display:flex; flex-direction:column; align-items:center; gap:var(--footer-gap); max-width:28rem; margin-inline:auto; font-family:var(--font-invitation); font-style:italic; font-size:1.6rem; line-height:1.7; color:var(--gold-soft); }
+.footer-note { --footer-gap:2rem; --footer-rise:14px; --footer-duration:.9s; --footer-stagger:400ms; --footer-delay:500ms; display:flex; flex-direction:column; align-items:center; gap:var(--footer-gap); max-width:28rem; margin-inline:auto; font-family:var(--font-invitation); font-style:italic; font-size:1.6rem; line-height:1.7; color:var(--gold-soft); }
 .footer-note__line { margin:0; }
 .footer-note__line:first-child { font-size:1.6rem; color:var(--gold-soft); }
 .footer-note--armed .footer-note__line { opacity:0; transform:translateY(var(--footer-rise)); }
-.footer-note--shown .footer-note__line { opacity:1; transform:none; transition:opacity var(--footer-duration) ease-out calc(var(--i) * var(--footer-stagger)), transform var(--footer-duration) ease-out calc(var(--i) * var(--footer-stagger)); }
+.footer-note--shown .footer-note__line { opacity:1; transform:none; transition:opacity var(--footer-duration) ease-out calc(var(--footer-delay) + var(--i) * var(--footer-stagger)), transform var(--footer-duration) ease-out calc(var(--footer-delay) + var(--i) * var(--footer-stagger)); }
 @media (prefers-reduced-motion: reduce) { .footer-note--armed .footer-note__line { opacity:1; transform:none; } .footer-note--shown .footer-note__line { transition:none; } }
 .invitation-hero + .foil-frame::before { top:-11px; }
 .event-card:last-child::after { display:none; }
@@ -519,7 +527,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .event-card.foil-frame { padding:2.25rem .75rem; }
 .event-card .event-img-wrap { position:relative; overflow:hidden; border-radius:var(--radius-lg); flex:none; height:21.25rem; }
 .event-card .event-img-wrap img { display:block; width:100%; height:100%; object-fit:cover; }
-.event-card .event-img-wrap.event-img-wrap--art img { aspect-ratio:auto; height:100%; width:100%; object-fit:cover; }
+/* contain (not cover) so the brushed, transparent edges baked into each webp are never cropped off. */
+.event-card .event-img-wrap.event-img-wrap--art img { aspect-ratio:auto; height:100%; width:100%; object-fit:contain; }
 .event-text { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding-top:1.25rem; padding-bottom:1.125rem; }
 .event-title { display:flex; align-items:center; justify-content:center; min-height:2.3em; }
 .event-time__num { font-size:1.4em; }

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { Heart, MapPin } from "lucide-react";
+import { Hand, Heart, MapPin } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 const welcomeDinnerImageAsset = { url: "/media/welcome-dinner.webp" };
@@ -50,6 +50,7 @@ const COUNTDOWN_TARGET = new Date("2026-12-12T00:00:00+05:30").getTime();
 const ENVELOPE_SESSION_KEY = "priyal-jatin-envelope-opened";
 const MUSIC_SRC = "/media/fade-into-you.mp3";
 const MUSIC_VOLUME = 0.45; // 0-1, final loudness
+const SCROLL_HINT_DELAY_MS = 3000; // idle time on page 1 before the "scroll down" hand appears
 const MUSIC_FADE_MS = 4000; // fade-in length after the envelope tap
 
 type IntroStep = "boot" | "envelope" | "opening" | "video" | "transition" | "final";
@@ -80,6 +81,8 @@ function createTicketPath(width: number, height: number) {
 
 function InvitationExperience({ children }: { children: ReactNode }) {
   const [step, setStep] = useState<IntroStep>("boot");
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [scrollHint, setScrollHint] = useState(false);
   const [ticketPath, setTicketPath] = useState("");
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -147,6 +150,28 @@ function InvitationExperience({ children }: { children: ReactNode }) {
     observer.observe(card);
     return () => observer.disconnect();
   }, []);
+
+  // Nudge the guest to scroll if they are still on page 1 a few seconds after the invitation appears.
+  useEffect(() => {
+    if (step !== "final") return;
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    let dismissed = false;
+    const onScroll = () => {
+      if (scroller.scrollTop > 20) {
+        dismissed = true;
+        setScrollHint(false);
+      }
+    };
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    const timeout = window.setTimeout(() => {
+      if (!dismissed && scroller.scrollTop <= 20) setScrollHint(true);
+    }, SCROLL_HINT_DELAY_MS);
+    return () => {
+      window.clearTimeout(timeout);
+      scroller.removeEventListener("scroll", onScroll);
+    };
+  }, [step]);
 
   useEffect(() => {
     if (step !== "transition") return;
@@ -231,6 +256,9 @@ function InvitationExperience({ children }: { children: ReactNode }) {
             .envelope-v2__back{transform:rotateX(180deg);background:linear-gradient(to bottom,#EFE6D6,#F6F0E4)}
             .envelope-v2--opening .envelope-v2__flap{will-change:transform;animation:envelope-v2-flap 1.3s cubic-bezier(.45,0,.2,1) forwards}
             .envelope-v2--opening .envelope-v2__pocket{will-change:transform;animation:envelope-v2-pocket 2.2s cubic-bezier(.65,0,.35,1) .9s forwards}
+            .envelope-v2__tap{animation:envelope-v2-tap-in 1s ease-out both}
+            .envelope-v2--opening .envelope-v2__tap{opacity:0;animation:none;transition:opacity .25s ease}
+            @keyframes envelope-v2-tap-in{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
             @keyframes envelope-v2-flap{to{transform:rotateX(-180deg)}}
             @keyframes envelope-v2-pocket{to{transform:translate3d(0,105%,0)}}
           `}</style>
@@ -241,6 +269,7 @@ function InvitationExperience({ children }: { children: ReactNode }) {
           </div>
 
           <div className="envelope-v2__pocket envelope-v2__paper fixed inset-0 z-[1] h-[100dvh] w-[100dvw] [clip-path:polygon(0_0,50%_var(--tip),100%_0,100%_100%,0_100%)]" aria-hidden="true" />
+          <p className="envelope-v2__tap pointer-events-none fixed left-1/2 top-[68%] z-[4] whitespace-nowrap font-script text-[clamp(1.5rem,7vw,2rem)] text-[#7A4B4B]" aria-hidden="true">Tap to open</p>
         </div>
       )}
 
@@ -251,7 +280,8 @@ function InvitationExperience({ children }: { children: ReactNode }) {
         aria-hidden={!showCard}
       >
         <div className="framed-invitation__paper" />
-        <div className="framed-invitation__scroll"><div className="framed-invitation__content">{children}</div></div>
+        <div ref={scrollRef} className="framed-invitation__scroll"><div className="framed-invitation__content">{children}</div></div>
+        <div className={`scroll-hint${scrollHint ? " scroll-hint--visible" : ""}`} aria-hidden="true"><Hand className="scroll-hint__hand" /><span>Scroll down</span></div>
       </div>
       {showCard && ticketPath && (
         <>
@@ -557,6 +587,12 @@ function InvitationHero() {
     return () => window.clearTimeout(timeout);
   }, [step]);
 
+  // Text reveals in three beats, STAGE_GAP_S apart: Ganesh + family, Jatin (with "with"), then Priyal.
+  const stage = (base: string, n: 0 | 1 | 2) => ({
+    className: `${base} invitation-stage${textVisible ? " invitation-stage--in" : ""}`,
+    style: { "--stage": n } as React.CSSProperties,
+  });
+
   return (
     <header id="home" className="invitation-hero">
       <div className="invitation-grain" aria-hidden="true" />
@@ -565,23 +601,21 @@ function InvitationHero() {
         <InvitationFlorals />
         <InvitationLotusBottom />
         <div className="invitation-copy">
-          <div className="invitation-logo-zone invitation-reveal invitation-reveal--1">
+          <div {...stage("invitation-logo-zone", 0)}>
             <img src={ganpatiLogo.url} alt="" aria-hidden="true" className="h-auto w-12" />
-            <div style={{ opacity: textVisible ? 1 : 0, transition: "opacity .8s ease" }}>
             <p className="invitation-blessing">|| Shri Ganeshay Namah ||</p>
-            </div>
           </div>
-          <div className="invitation-text-area" style={{ opacity: textVisible ? 1 : 0, transition: "opacity .8s ease" }}>
-          <div className="invitation-intro invitation-reveal invitation-reveal--2"><p className="invitation-family-title">Mulchandani Family</p><p>Awaits your presence for the wedding celebrations of their beloved son</p></div>
-          <div className="invitation-person invitation-reveal invitation-reveal--3">
+          <div className="invitation-text-area">
+          <div {...stage("invitation-intro", 0)}><p className="invitation-family-title">Mulchandani Family</p><p>Awaits your presence for the wedding celebrations of their beloved son</p></div>
+          <div {...stage("invitation-person", 1)}>
             <h1 className="invitation-name">Jatin</h1>
             <div className="invitation-family">
-              <p>(Grand s/o Late Hiranand<br />&amp; Smt. Ganeshidevi Mulchandani)</p>
+              <p>(Grand s/o Late Shri Hiranand<br />&amp; Smt. Ganeshidevi Mulchandani)</p>
               <p>S/o Mr. Shyam &amp; Mrs. Aarti Mulchandani</p>
             </div>
           </div>
-          <div className="invitation-ampersand invitation-reveal invitation-reveal--4">with</div>
-          <div className="invitation-person invitation-reveal invitation-reveal--5">
+          <div {...stage("invitation-ampersand", 1)}>with</div>
+          <div {...stage("invitation-person", 2)}>
             <h2 className="invitation-name invitation-name--groom">Priyal</h2>
             <div className="invitation-family">
               <p>(Grand d/o Late Shri Shankerlalji<br />&amp; Smt. Sitadevi Bang)</p>
@@ -645,7 +679,7 @@ function Index() {
 
         {/* PAGE: Venue — pinned to --page-len (850px), content centred. No other client cosmetic notes yet. */}
         <section id="venue" className="foil-frame page-pin relative bg-transparent px-5 text-foreground md:px-10"><div className="relative mx-auto max-w-6xl"><SectionHeading title="The Venue" tone="dark" />
-         <div><p className="whitespace-nowrap text-center font-display text-[clamp(1.9rem,10.5cqw,3rem)] text-primary">Praveg Lake Resort</p><p className="mt-2 text-center font-body text-[1.23rem] font-bold tracking-[0.2em]">Daman</p><div className="mt-6 flex justify-center"><Button asChild variant="outline" className="h-12 rounded-lg border-primary bg-primary px-7 uppercase tracking-[0.16em] text-primary-foreground hover:border-accent hover:bg-accent hover:text-accent-foreground"><a href="https://share.google/wXPgCUtC4Ho5l4KOc" target="_blank" rel="noopener noreferrer"><MapPin /> Get Directions</a></Button></div><div className="mt-8 border-y border-gold/35 py-4"><strong className="block text-sm uppercase tracking-[0.18em] text-primary">Getting There</strong><ul className="mt-3 list-disc space-y-2 pl-5 text-left text-base text-muted-foreground"><li>Approximately 6 km from Vapi Railway Station</li><li>127 km from Surat International Airport via NH&nbsp;48</li><li>164 km from Mumbai International Airport</li></ul><div className="mt-[2.0625rem]"><strong className="block text-[1.05rem] uppercase tracking-[0.18em] text-primary">Accommodation</strong><p className="mt-2 text-lg text-muted-foreground">Check-in: 11/12/2026, 1 PM<br />Check-out: 13/12/2026, 10 AM</p></div></div></div>
+         <div><p className="whitespace-nowrap text-center font-display text-[clamp(1.9rem,10.5cqw,3rem)] text-primary">Praveg Lake Resort</p><p className="mt-2 text-center font-body text-[1.23rem] font-bold tracking-[0.2em]">Daman</p><div className="mt-6 flex justify-center"><Button asChild variant="outline" className="h-12 rounded-lg border-primary bg-primary px-7 uppercase tracking-[0.16em] text-primary-foreground hover:border-accent hover:bg-accent hover:text-accent-foreground"><a href="https://share.google/wXPgCUtC4Ho5l4KOc" target="_blank" rel="noopener noreferrer"><MapPin /> Get Directions</a></Button></div><div className="mt-8 py-4"><strong className="block text-[1.05rem] uppercase tracking-[0.18em] text-primary">Getting There</strong><ul className="mt-3 list-disc space-y-2 pl-5 text-left text-base text-muted-foreground"><li>Approximately 6 km from Vapi Railway Station</li><li>127 km from Surat International Airport via NH&nbsp;48</li><li>164 km from Mumbai International Airport</li></ul><div className="mt-[2.0625rem]"><strong className="block text-[1.05rem] uppercase tracking-[0.18em] text-primary">Accommodation</strong><p className="mt-2 text-lg text-muted-foreground">Check-in: 11/12/2026, 1 PM<br />Check-out: 13/12/2026, 10 AM</p></div></div></div>
       </div></section>
 
         {/* PAGE: Footer — pinned to --page-len (850px); the note is centred, so it sits in a tall panel. */}
