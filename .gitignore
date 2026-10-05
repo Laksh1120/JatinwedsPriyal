@@ -31,3 +31,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local working notes & editor files (not part of the site)
+NOTES.local.md
+client_notes/
+*.iml

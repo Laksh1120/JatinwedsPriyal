@@ -38,12 +38,12 @@ const phereImage = phereImageAsset.url;
 type EventItem = { image: string; alt: string; title: string; date: [string, string, string]; time: string; day: string; note?: string };
 
 const eventDays: EventItem[] = [
-  { image: welcomeDinnerImage, alt: "Lakeside welcome celebration", title: "Welcome Lunch", date: ["11", "12", "26"], time: "1 P.M. onwards", day: "Friday" },
-  { image: ringCeremonyImage, alt: "Rings on a lavender cushion", title: "Ring Ceremony & Sangeet", date: ["11", "12", "26"], time: "5 P.M. onwards", day: "Friday", note: "Followed by Cocktail Party" },
-  { image: haldiImage, alt: "Flower haldi seat with marigolds", title: "Phoolon Wali Haldi", date: ["12", "12", "26"], time: "10 A.M. onwards", day: "Saturday" },
-  { image: baraatImage, alt: "Baraat procession with dhol", title: "Baraat", date: ["12", "12", "26"], time: "6 P.M. onwards", day: "Saturday" },
-  { image: receptionImage, alt: "Candlelit reception by the lake", title: "Reception", date: ["12", "12", "26"], time: "8 P.M. onwards", day: "Saturday" },
-  { image: phereImage, alt: "Mandap by the lake at night", title: "Phere", date: ["12", "12", "26"], time: "11 P.M. onwards", day: "Saturday" },
+  { image: welcomeDinnerImage, alt: "Lakeside welcome celebration", title: "Welcome Lunch", date: ["11", "12", "26"], time: "1 PM onwards", day: "Friday" },
+  { image: ringCeremonyImage, alt: "Rings on a lavender cushion", title: "Ring Ceremony & Sangeet", date: ["11", "12", "26"], time: "5 PM onwards", day: "Friday", note: "Followed by Cocktail Party" },
+  { image: haldiImage, alt: "Flower haldi seat with marigolds", title: "Phoolon Wali Haldi", date: ["12", "12", "26"], time: "10 AM onwards", day: "Saturday" },
+  { image: baraatImage, alt: "Baraat procession with dhol", title: "Baraat", date: ["12", "12", "26"], time: "6 PM onwards", day: "Saturday" },
+  { image: receptionImage, alt: "Candlelit reception by the lake", title: "Reception", date: ["12", "12", "26"], time: "8 PM onwards", day: "Saturday" },
+  { image: phereImage, alt: "Mandap by the lake at night", title: "Phere", date: ["12", "12", "26"], time: "11 PM onwards", day: "Saturday" },
 ];
 
 const COUNTDOWN_TARGET = new Date("2026-12-12T00:00:00+05:30").getTime();
@@ -490,8 +490,7 @@ function InvitationLotusBottom() {
 }
 
 const FOOTER_LINES = [
-  "With hearts full of joy,",
-  "we invite you to join us in celebrating love, laughter, and the start of a beautiful new chapter.",
+  "With hearts full of joy, we invite you to join us in celebrating love, laughter, and the start of a beautiful new chapter.",
   "Your presence and blessings will make this celebration truly memorable.",
 ];
 const FOOTER_REVEAL_THRESHOLD = 0.3; // fraction of the footer visible before the text rises in
@@ -520,8 +519,10 @@ function InvitationFooter() {
   }, []);
 
   return (
-    <footer ref={footerRef} className="foil-frame checker-footer page-footer px-5 text-center">
-      <div className={`footer-note footer-note--${phase}`}>
+    <footer ref={footerRef} className="foil-frame checker-footer page-pin relative overflow-hidden px-5 text-center">
+      <InvitationFlorals />
+      <InvitationLotusBottom />
+      <div className={`footer-note footer-note--${phase} relative z-[3]`}>
         {FOOTER_LINES.map((line, index) => (
           <p key={line} className="footer-note__line" style={{ "--i": index } as React.CSSProperties}>
             {line}
@@ -565,7 +566,7 @@ function InvitationHero() {
           <div className="invitation-person invitation-reveal invitation-reveal--3">
             <h1 className="invitation-name">Jatin</h1>
             <div className="invitation-family">
-              <p>Grand s/o Late Hiranand &amp; Smt. Ganeshidevi Mulchandani</p>
+              <p>(Grand s/o Late Hiranand<br />&amp; Smt. Ganeshidevi Mulchandani)</p>
               <p>S/o Mr. Shyam &amp; Mrs. Aarti Mulchandani</p>
             </div>
           </div>
@@ -573,7 +574,7 @@ function InvitationHero() {
           <div className="invitation-person invitation-reveal invitation-reveal--5">
             <h2 className="invitation-name invitation-name--groom">Priyal</h2>
             <div className="invitation-family">
-              <p>(Grand d/o Late Shri Shankerlalji &amp; Smt. Sitadevi Bang)</p>
+              <p>(Grand d/o Late Shri Shankerlalji<br />&amp; Smt. Sitadevi Bang)</p>
               <p>D/o of Mr. Dinesh &amp; Mrs. Meenakshi Bang</p>
             </div>
           </div>
@@ -589,42 +590,55 @@ function Index() {
   return (
     <InvitationExperience>
       <main className="overflow-hidden bg-background text-foreground">
+      {/* PAGE: Invitation / Hero — pinned to --page-len (850px). Pending cosmetic tweaks (client notes):
+          T1 bottom lotuses get clipped → make fully visible · T2 top lotuses: bring down + longer stem (preview first)
+          · T3 move Ganesh symbol down so lowered lotuses don't cover it · T4 Jatin's family line in brackets like
+          Priyal's · T5 Jatin block: '&' starts a new line, width matches Priyal · T6 reduce space above/below "with". */}
       <InvitationHero />
 
-       <section id="event" className="foil-frame checker-section page-section px-5 md:px-10"><div className="relative mx-auto max-w-5xl"><SectionHeading title="Counting the days..." />
+       {/* PAGE: Countdown — pinned to --page-len (850px), content centred. No other client cosmetic notes yet. */}
+       <section id="event" className="foil-frame checker-section page-pin px-5 md:px-10"><div className="relative mx-auto max-w-5xl"><SectionHeading title="Counting the days..." />
         <Countdown />
          <div className="mt-10 overflow-hidden rounded-lg border border-blush bg-card/60"><div className="p-7 text-center"><p className="font-invitation text-2xl">11th – 12th December, 2026</p></div></div>
       </div></section>
 
-       <section id="events" className="foil-frame events-section page-section px-0">
+       {/* PAGES: Events — one 850px page per event (photo fills leftover space, object-fit:contain), pages butt
+           directly (gap-0). The "The Events" title band is intentionally excluded from the 850px rule. */}
+       <section id="events" className="foil-frame events-section px-0">
          <div className="relative mx-auto w-full max-w-none">
-           <div className="px-5"><SectionHeading eyebrow="Two days of celebration" title="The Events" tone="dark" /></div>
-           <div className="grid gap-8">
-             {eventDays.map((item) => (
+           <div className="px-5"><SectionHeading title="The Events" tone="dark" /></div>
+           <div className="grid gap-0">
+             {eventDays.map((item) => {
+               const [timeNum, ...timeRestArr] = item.time.split(" ");
+               const timeRest = timeRestArr.join(" ");
+               return (
                    <article key={item.title} className="event-card foil-frame w-full mx-0">
                     <div className={`event-img-wrap${item.image.endsWith(".webp") ? " event-img-wrap--art" : ""}`}>
                       <img src={item.image} alt={item.alt} loading="lazy" width={896} height={1024} />
                     </div>
-                    <div className="relative px-6 py-9 text-center md:px-8">
-                       <h3 className="font-script text-4xl font-normal text-primary md:text-5xl">{item.title}</h3>
-                      <div className="mx-auto my-6 h-px w-16 bg-gold-soft/60" />
-                        <p className="font-script text-3xl text-[#A8862F]">{item.time}</p>
+                    <div className="event-text relative px-6 text-center md:px-8">
+                       <h3 className="event-title font-script text-4xl font-normal text-primary md:text-5xl">{item.title}</h3>
+                      <div className="mx-auto mt-3 mb-4 h-px w-16 bg-gold-soft/60" />
+                        <p className="font-script text-3xl text-[#A8862F]"><span className="event-time__num">{timeNum}</span> {timeRest}</p>
                        <p className="mt-3 font-invitation text-2xl text-foreground md:text-3xl">
                         {item.date[0]} <span className="mx-2 text-gold">|</span> {item.date[1]} <span className="mx-2 text-gold">|</span> {item.date[2]}
                       </p>
                        <p className="mt-3 font-script text-3xl text-[#A8862F]">{item.day}</p>
-                       {item.note && <p className="mt-4 text-sm uppercase tracking-[0.16em] text-muted-foreground">{item.note}</p>}
+                       {item.note && <p className="mt-3 text-sm uppercase tracking-[0.16em] text-muted-foreground">{item.note}</p>}
                     </div>
                   </article>
-             ))}
+               );
+             })}
            </div>
         </div>
       </section>
 
-        <section id="venue" className="foil-frame page-section relative bg-transparent px-5 text-foreground md:px-10"><div className="relative mx-auto max-w-6xl"><div className="pt-10"><SectionHeading title="The Venue" tone="dark" /></div>
-         <div><p className="whitespace-nowrap text-center font-display text-[clamp(1.9rem,9vw,3rem)] text-primary">Praveg Lake Resort</p><p className="mt-2 text-center font-body text-sm font-bold tracking-[0.2em]">Daman</p><div className="mt-8 border-y border-gold/35 py-4"><strong className="block text-sm uppercase tracking-[0.18em] text-primary">Getting There</strong><ul className="mt-3 list-disc space-y-2 pl-5 text-left text-base text-muted-foreground"><li>Approximately 6 km from Vapi Railway Station</li><li>127 km from Surat International Airport via NH&nbsp;48</li><li>185 km from Mumbai</li></ul><div className="mt-6"><strong className="block text-sm uppercase tracking-[0.18em] text-primary">Accommodations</strong><p className="mt-2 text-base text-muted-foreground">Check-in: 11/12/2026, 1 P.M.<br />Check-out: 13/12/2026, 10 A.M.</p></div></div><Button asChild variant="outline" className="mt-8 h-12 rounded-lg border-primary bg-primary px-7 uppercase tracking-[0.16em] text-primary-foreground hover:border-accent hover:bg-accent hover:text-accent-foreground"><a href="https://share.google/wXPgCUtC4Ho5l4KOc" target="_blank" rel="noopener noreferrer"><MapPin /> Get Directions</a></Button></div>
+        {/* PAGE: Venue — pinned to --page-len (850px), content centred. No other client cosmetic notes yet. */}
+        <section id="venue" className="foil-frame page-pin relative bg-transparent px-5 text-foreground md:px-10"><div className="relative mx-auto max-w-6xl"><SectionHeading title="The Venue" tone="dark" />
+         <div><p className="whitespace-nowrap text-center font-display text-[clamp(1.9rem,9vw,3rem)] text-primary">Praveg Lake Resort</p><p className="mt-2 text-center font-body text-[1.23rem] font-bold tracking-[0.2em]">Daman</p><div className="mt-6 flex justify-center"><Button asChild variant="outline" className="h-12 rounded-lg border-primary bg-primary px-7 uppercase tracking-[0.16em] text-primary-foreground hover:border-accent hover:bg-accent hover:text-accent-foreground"><a href="https://share.google/wXPgCUtC4Ho5l4KOc" target="_blank" rel="noopener noreferrer"><MapPin /> Get Directions</a></Button></div><div className="mt-8 border-y border-gold/35 py-4"><strong className="block text-sm uppercase tracking-[0.18em] text-primary">Getting There</strong><ul className="mt-3 list-disc space-y-2 pl-5 text-left text-base text-muted-foreground"><li>Approximately 6 km from Vapi Railway Station</li><li>127 km from Surat International Airport via NH&nbsp;48</li><li>164 km from Mumbai International Airport</li></ul><div className="mt-[33px]"><strong className="block text-[1.05rem] uppercase tracking-[0.18em] text-primary">Accommodation</strong><p className="mt-2 text-lg text-muted-foreground">Check-in: 11/12/2026, 1 PM<br />Check-out: 13/12/2026, 10 AM</p></div></div></div>
       </div></section>
 
+        {/* PAGE: Footer — pinned to --page-len (850px); the note is centred, so it sits in a tall panel. */}
         <InvitationFooter />
       </main>
     </InvitationExperience>
