@@ -473,6 +473,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   mask-size:51% 51%;
   mask-repeat:no-repeat;
 }
+/* Countdown: the four boxes flip in one after another when the page scrolls into view. */
+.count-grid { perspective:900px; }
+.count-grid--armed .count-card { opacity:0; transform:rotateX(-90deg); transform-origin:50% 0; }
+.count-grid--shown .count-card { animation:count-flip .7s cubic-bezier(.25,.8,.3,1) calc(var(--i) * .25s) both; transform-origin:50% 0; backface-visibility:hidden; }
+@keyframes count-flip { from { opacity:0; transform:rotateX(-90deg); } to { opacity:1; transform:rotateX(0); } }
 .count-card .num { display:block; font-family:var(--font-invitation); font-weight:500; font-size:clamp(2.6rem,11.6cqw,5.25rem); line-height:.92; color:var(--foreground); font-variant-numeric:tabular-nums; }
 .count-card .rule { display:block; width:2.25rem; height:1px; margin:1.1rem auto 0; background:var(--gold-soft); opacity:.55; }
 .count-card .lbl { display:block; margin-top:.85rem; font-size:.72rem; text-transform:uppercase; letter-spacing:.22em; color:var(--muted-foreground); }

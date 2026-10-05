@@ -311,6 +311,27 @@ function getRemaining() {
 
 function Countdown() {
   const [remaining, setRemaining] = useState<ReturnType<typeof getRemaining> | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  // "static" = visible (SSR / no JS), "armed" = hidden and waiting, "shown" = flipping in one after another
+  const [flip, setFlip] = useState<"static" | "armed" | "shown">("static");
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || typeof IntersectionObserver === "undefined") return;
+    setFlip("armed");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setFlip("shown");
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.4 },
+    );
+    observer.observe(grid);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     setRemaining(getRemaining());
@@ -328,9 +349,9 @@ function Countdown() {
 
   return (
     <div className="animate-fade-in">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {units.map((unit) => (
-          <div key={unit.label} className="count-card">
+      <div ref={gridRef} className={`count-grid count-grid--${flip} grid grid-cols-2 gap-3 lg:grid-cols-4`}>
+        {units.map((unit, index) => (
+          <div key={unit.label} className="count-card" style={{ "--i": index } as React.CSSProperties}>
             <span className="num" aria-hidden="true">{unit.value}</span>
             <span className="rule" aria-hidden="true" />
             <span className="lbl">{unit.label}</span>
