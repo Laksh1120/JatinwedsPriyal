@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { Hand, Heart, MapPin } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -550,6 +550,151 @@ function InvitationLotusBottom() {
   );
 }
 
+const PAINT_COLOR = "#F2EADC"; // the page background as rendered (sampled from the live page)
+const PAINT_RUB_DELAY_MS = 300; // pause (paint fully visible) before the rubbing starts
+const PAINT_RUB_MS = 1100; // how long the automatic rubbing takes to clear the page
+
+type PaintDirection = "down" | "up" | "right" | "left";
+const PAINT_DIRECTIONS: PaintDirection[] = ["down", "up", "right", "left"];
+let paintBag: PaintDirection[] = [];
+// Random rub direction per event page, drawn from a shuffled bag so neighbouring pages rarely repeat.
+function takePaintDirection(): PaintDirection {
+  if (paintBag.length === 0) paintBag = [...PAINT_DIRECTIONS].sort(() => Math.random() - 0.5);
+  return paintBag.pop() as PaintDirection;
+}
+
+// Flat cover in exactly the page's background colour, so the paint is the same colour as every other page. The
+// removed edge reads as paint thanks to the soft shadow on `.event-paint`, not a different tint.
+function paintSurface(ctx: CanvasRenderingContext2D, w: number, h: number, color: string) {
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, w, h);
+}
+
+// A canvas of paint (the page's background colour) over the whole event page that is rubbed away automatically (a zig-zag
+// swipe from top to bottom), revealing the page underneath.
+function PaintCover({ color, rub, direction, onDone }: { color: string; rub: boolean; direction: PaintDirection; onDone: () => void }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
+    canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
+    const ctx = canvas.getContext("2d");
+    if (ctx) paintSurface(ctx, canvas.width, canvas.height, color);
+  }, [color]);
+
+  useEffect(() => {
+    if (!rub) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) {
+      onDone();
+      return;
+    }
+    const w = canvas.width;
+    const h = canvas.height;
+    // Sweep rows run across the page; the sweep advances along `length` (top→bottom, bottom→top, left→right or right→left).
+    const vertical = direction === "down" || direction === "up";
+    const reversed = direction === "up" || direction === "left";
+    const length = vertical ? h : w;
+    const across = vertical ? w : h;
+    const brush = Math.max(length / 5, 120);
+    const rows = Math.ceil(length / (brush * 0.75));
+    let start: number | null = null;
+    let prev: { x: number; y: number } | null = null;
+    let raf = 0;
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.strokeStyle = "#000"; // opaque, so each swipe removes the paint completely (not just a fraction)
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = brush;
+    const tick = (now: number) => {
+      if (start === null) start = now + PAINT_RUB_DELAY_MS;
+      const t = Math.min(Math.max((now - start) / PAINT_RUB_MS, 0), 1);
+      if (t > 0) {
+        const f = t * rows;
+        const row = Math.min(rows - 1, Math.floor(f));
+        const u = f - row;
+        const along = -brush * 0.3 + (row % 2 === 0 ? u : 1 - u) * (across + brush * 0.6);
+        let advance = ((row + 0.5) / rows) * length + Math.sin(u * Math.PI * 2 + row) * brush * 0.2;
+        if (reversed) advance = length - advance;
+        const x = vertical ? along : advance;
+        const y = vertical ? advance : along;
+        if (prev) {
+          ctx.beginPath();
+          ctx.moveTo(prev.x, prev.y);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+        }
+        prev = { x, y };
+      }
+      if (t < 1) {
+        raf = window.requestAnimationFrame(tick);
+      } else {
+        ctx.clearRect(0, 0, w, h);
+        onDone();
+      }
+    };
+    raf = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(raf);
+  }, [rub, direction, onDone]);
+
+  return <canvas ref={canvasRef} className="event-paint" aria-hidden="true" />;
+}
+
+// Each event page starts covered in its theme-coloured paint, which rubs away on its own when the page scrolls
+// into view.
+function EventCard({ item }: { item: EventItem }) {
+  const cardRef = useRef<HTMLElement>(null);
+  // "static" = no paint (SSR / no JS / reduced motion), "armed" = painted and waiting, "shown" = rubbing, "done" = clear
+  const [phase, setPhase] = useState<"static" | "armed" | "shown" | "done">("static");
+  const [timeNum, ...timeRestArr] = item.time.split(" ");
+  const timeRest = timeRestArr.join(" ");
+  const art = item.image.split("/").pop()?.replace(/\.\w+$/, "");
+  const [direction, setDirection] = useState<PaintDirection>("down");
+  const finish = useCallback(() => setPhase("done"), []);
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || typeof IntersectionObserver === "undefined") return;
+    setDirection(takePaintDirection());
+    setPhase("armed");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        setPhase("shown");
+      },
+      { threshold: 0.35 },
+    );
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <article ref={cardRef} className="event-card foil-frame w-full mx-0">
+      <div className={`event-img-wrap${item.image.endsWith(".webp") ? " event-img-wrap--art" : ""}`}>
+        <img src={item.image} alt={item.alt} data-art={art} loading="lazy" width={896} height={1024} />
+      </div>
+      <div className="event-text relative px-6 text-center md:px-8">
+        <h3 className="event-title font-script text-4xl font-normal text-primary md:text-5xl">{item.title}</h3>
+        <div className="mx-auto mt-3 mb-4 h-px w-16 bg-gold-soft/60" />
+        <p className="event-time text-[#A8862F]"><span className="event-time__num">{timeNum}</span> {timeRest}</p>
+        <p className="mt-3 font-invitation text-2xl text-foreground md:text-3xl">
+          {item.date[0]} <span className="mx-2 text-gold">|</span> {item.date[1]} <span className="mx-2 text-gold">|</span> {item.date[2]}
+        </p>
+        <p className="mt-3 font-script text-3xl text-[#A8862F]">{item.day}</p>
+        {item.note && <p className="mt-3 text-sm uppercase tracking-[0.16em] text-muted-foreground">{item.note}</p>}
+      </div>
+      {(phase === "armed" || phase === "shown") && <PaintCover color={PAINT_COLOR} rub={phase === "shown"} direction={direction} onDone={finish} />}
+    </article>
+  );
+}
+
 const FOOTER_LINES = [
   "With hearts full of joy, we invite you to join us in celebrating love, laughter, and the start of a beautiful new chapter.",
   "Your presence and blessings will make this celebration truly memorable.",
@@ -673,27 +818,7 @@ function Index() {
          <div className="relative mx-auto w-full max-w-none">
            <div className="px-5"><SectionHeading title="The Events" tone="dark" /></div>
            <div className="grid gap-0">
-             {eventDays.map((item) => {
-               const [timeNum, ...timeRestArr] = item.time.split(" ");
-               const timeRest = timeRestArr.join(" ");
-               return (
-                   <article key={item.title} className="event-card foil-frame w-full mx-0">
-                    <div className={`event-img-wrap${item.image.endsWith(".webp") ? " event-img-wrap--art" : ""}`}>
-                      <img src={item.image} alt={item.alt} loading="lazy" width={896} height={1024} />
-                    </div>
-                    <div className="event-text relative px-6 text-center md:px-8">
-                       <h3 className="event-title font-script text-4xl font-normal text-primary md:text-5xl">{item.title}</h3>
-                      <div className="mx-auto mt-3 mb-4 h-px w-16 bg-gold-soft/60" />
-                        <p className="event-time text-[#A8862F]"><span className="event-time__num">{timeNum}</span> {timeRest}</p>
-                       <p className="mt-3 font-invitation text-2xl text-foreground md:text-3xl">
-                        {item.date[0]} <span className="mx-2 text-gold">|</span> {item.date[1]} <span className="mx-2 text-gold">|</span> {item.date[2]}
-                      </p>
-                       <p className="mt-3 font-script text-3xl text-[#A8862F]">{item.day}</p>
-                       {item.note && <p className="mt-3 text-sm uppercase tracking-[0.16em] text-muted-foreground">{item.note}</p>}
-                    </div>
-                  </article>
-               );
-             })}
+             {eventDays.map((item) => <EventCard key={item.title} item={item} />)}
            </div>
         </div>
       </section>
