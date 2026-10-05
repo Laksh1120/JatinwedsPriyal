@@ -86,6 +86,7 @@ function InvitationExperience({ children }: { children: ReactNode }) {
   const fallbackRef = useRef<number | null>(null);
   const musicRef = useRef<HTMLAudioElement>(null);
   const fadeRef = useRef(0);
+  const musicStartedRef = useRef(false);
 
   const fadeMusicIn = () => {
     const music = musicRef.current;
@@ -104,8 +105,17 @@ function InvitationExperience({ children }: { children: ReactNode }) {
   const startMusic = () => {
     const music = musicRef.current;
     if (!music) return;
+    musicStartedRef.current = true;
     void music.play().then(fadeMusicIn).catch(() => undefined);
   };
+
+  // Some browsers (notably iOS Safari) pause the song while the intro video plays or ends; keep it going.
+  useEffect(() => {
+    if (step !== "transition" && step !== "final") return;
+    const music = musicRef.current;
+    if (!music || !musicStartedRef.current || !music.paused) return;
+    void music.play().catch(() => undefined);
+  }, [step]);
 
   useEffect(() => () => window.cancelAnimationFrame(fadeRef.current), []);
 
