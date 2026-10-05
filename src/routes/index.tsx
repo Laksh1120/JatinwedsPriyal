@@ -42,7 +42,7 @@ const eventDays: EventItem[] = [
   { image: ringCeremonyImage, alt: "Rings on a lavender cushion", title: "Ring Ceremony & Sangeet", date: ["11", "12", "26"], time: "5 PM onwards", day: "Friday", note: "Followed by Cocktail Party" },
   { image: haldiImage, alt: "Flower haldi seat with marigolds", title: "Phoolon Wali Haldi", date: ["12", "12", "26"], time: "10 AM onwards", day: "Saturday" },
   { image: baraatImage, alt: "Baraat procession with dhol", title: "Baraat", date: ["12", "12", "26"], time: "6 PM onwards", day: "Saturday" },
-  { image: receptionImage, alt: "Candlelit reception by the lake", title: "Reception", date: ["12", "12", "26"], time: "8 PM onwards", day: "Saturday" },
+  { image: receptionImage, alt: "Candlelit reception by the lake", title: "Baraat Swagat & Reception", date: ["12", "12", "26"], time: "8 PM onwards", day: "Saturday" },
   { image: phereImage, alt: "Mandap by the lake at night", title: "Phere", date: ["12", "12", "26"], time: "11 PM onwards", day: "Saturday" },
 ];
 
@@ -643,7 +643,7 @@ function Index() {
        {/* PAGE: Countdown — pinned to --page-len (850px), content centred. No other client cosmetic notes yet. */}
        <section id="event" className="foil-frame checker-section page-pin px-5 md:px-10"><div className="relative mx-auto max-w-5xl"><SectionHeading title="Counting the days..." />
         <Countdown />
-         <div className="mt-10 overflow-hidden rounded-lg border border-blush bg-card/60"><div className="p-7 text-center"><p className="font-invitation text-2xl">11th – 12th December, 2026</p></div></div>
+         <div className="mt-10 overflow-hidden rounded-lg border border-blush bg-card/60"><div className="px-3 py-7 text-center"><p className="whitespace-nowrap font-invitation text-[1.2rem]">11<sup className="ordinal">th</sup> &amp; 12<sup className="ordinal">th</sup> December, 2026</p></div></div>
       </div></section>
 
        {/* PAGES: Events — one 850px page per event (photo fills leftover space, object-fit:contain), pages butt
@@ -663,7 +663,7 @@ function Index() {
                     <div className="event-text relative px-6 text-center md:px-8">
                        <h3 className="event-title font-script text-4xl font-normal text-primary md:text-5xl">{item.title}</h3>
                       <div className="mx-auto mt-3 mb-4 h-px w-16 bg-gold-soft/60" />
-                        <p className="font-script text-3xl text-[#A8862F]"><span className="event-time__num">{timeNum}</span> {timeRest}</p>
+                        <p className="event-time text-[#A8862F]"><span className="event-time__num">{timeNum}</span> {timeRest}</p>
                        <p className="mt-3 font-invitation text-2xl text-foreground md:text-3xl">
                         {item.date[0]} <span className="mx-2 text-gold">|</span> {item.date[1]} <span className="mx-2 text-gold">|</span> {item.date[2]}
                       </p>

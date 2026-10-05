@@ -478,7 +478,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .count-card .lbl { display:block; margin-top:.85rem; font-size:.72rem; text-transform:uppercase; letter-spacing:.22em; color:var(--muted-foreground); }
 #event .section-heading { padding-top:0; }
 /* Countdown: nudge the bottom gold line up ~18px; otherwise equal-length like the other pages. */
-#event.page-pin { min-height:calc(var(--page-len) - 18px); padding-top:calc(1.625rem + 30px); }
+/* Raised ordinal suffix (11th, 12th) without stretching the line height. */
+.ordinal { font-size:.6em; line-height:0; vertical-align:super; }
+/* Hug the content so the bottom gold line sits close under the date instead of leaving empty space. */
+/* Venue: hug the content so the bottom gold line sits close under the Accommodation times. */
+#venue.page-pin { min-height:0; padding-bottom:2.25rem; }
+#event.page-pin { min-height:0; padding-top:calc(1.625rem + 30px); padding-bottom:2.25rem; }
 
 
 .checker-section,.checker-footer { position:relative; background:transparent; }
@@ -491,7 +496,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
    consistent gap under the top gold line across pages. */
 .page-pin { min-height:var(--page-len); display:flex; flex-direction:column; justify-content:flex-start; }
 /* Footer is a short closing note with no heading — centre it rather than top-align. */
-.page-pin.checker-footer { justify-content:center; }
+.page-pin.checker-footer { justify-content:center; min-height:calc(var(--page-len) - 6rem); }
 
 .foil-frame {
   position:relative;
@@ -510,7 +515,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 .foil-frame::before { top:0; }
 .foil-frame::after { bottom:0; }
-.checker-footer::after { bottom:-6px; }
+/* Last page: no closing gold line under the footer. */
+.checker-footer::after { display:none; }
 .foil-frame + .foil-frame::before { display:none; }
 .footer-note { --footer-gap:2rem; --footer-rise:14px; --footer-duration:.9s; --footer-stagger:400ms; --footer-delay:500ms; display:flex; flex-direction:column; align-items:center; gap:var(--footer-gap); max-width:28rem; margin-inline:auto; font-family:var(--font-invitation); font-style:italic; font-size:1.6rem; line-height:1.7; color:var(--gold-soft); }
 .footer-note__line { margin:0; }
@@ -524,16 +530,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
 /* ============= Events ============= */
 .events-section { position:relative; background:transparent; }
 .event-card { position:relative; width:100%; margin-inline:0; min-height:var(--page-len); display:flex; flex-direction:column; }
-.event-card.foil-frame { padding:2.25rem .75rem; }
-.event-card .event-img-wrap { position:relative; overflow:hidden; border-radius:var(--radius-lg); flex:none; height:21.25rem; }
+.event-card.foil-frame { padding:1.75rem .25rem; }
+.event-card .event-img-wrap { position:relative; overflow:hidden; border-radius:var(--radius-lg); flex:none; height:26rem; }
 .event-card .event-img-wrap img { display:block; width:100%; height:100%; object-fit:cover; }
-/* cover + a slight zoom (wrapper clips it) trims the brushed, transparent edges baked into each webp, leaving a clean edge. */
-.event-card .event-img-wrap.event-img-wrap--art img { aspect-ratio:auto; height:100%; width:100%; object-fit:cover; transform:scale(1.1); }
-/* Ring Ceremony's left edge is more ragged: zoom a bit more, anchored right, so the left is trimmed deeper. */
-.event-card .event-img-wrap.event-img-wrap--art img[src$="ring-ceremony.webp"] { transform:scale(1.15); transform-origin:75% 50%; }
+/* contain (not cover) so the brushed, transparent edges baked into each webp are never cropped off. */
+.event-card .event-img-wrap.event-img-wrap--art img { aspect-ratio:auto; height:100%; width:100%; object-fit:contain; }
 .event-text { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding-top:1.25rem; padding-bottom:1.125rem; }
 .event-title { display:flex; align-items:center; justify-content:center; min-height:2.3em; }
-.event-time__num { font-size:1.4em; }
+.event-time { font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; font-size:1.25rem; font-weight:500; letter-spacing:.04em; line-height:1.2; }
+.event-time__num { font-size:1.5em; font-weight:600; }
 .font-script { font-family:"Playfair Display", "Great Vibes", cursive; }
 #events .section-heading { padding-top:0; margin-bottom:1.25rem; }
 /* (was max-width:767px) phone styles now apply at every window size */
