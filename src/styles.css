@@ -5,6 +5,12 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* The invitation is one phone-shaped ticket at every window size, so viewport breakpoints never apply. */
+  --breakpoint-sm: 9999px;
+  --breakpoint-md: 9999px;
+  --breakpoint-lg: 9999px;
+  --breakpoint-xl: 9999px;
+  --breakpoint-2xl: 9999px;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -41,13 +47,17 @@
   --font-script: "Playfair Display", "Great Vibes", cursive;
 }
 
+html { font-size:clamp(10px,calc(var(--ticket-w) * .04776),28px); }
+
 :root {
   --radius: .625rem;
   --page-gap: clamp(24px, 7vw, 40px);
   /* 2px short of the visible window so the bottom gold line stays visible on every device. */
   --page-len: calc(100dvh - 2 * var(--page-gap) - 2px);
-  --section-top: clamp(56px, 14vw, 88px);
-  --section-bottom: clamp(28px, 7vw, 44px);
+  --section-top: 3.5rem;
+  --section-bottom: 1.75rem;
+  /* Phone-shaped ticket (aspect 335:789, the design reference) that fits any window. */
+  --ticket-w: min(calc(100vw - 2 * var(--page-gap)), calc(.4246 * (100dvh - 2 * var(--page-gap))));
   --background: oklch(0.9425 0.0205 81.78);
   --foreground: oklch(0.3169 0.0197 43.83);
   --card: oklch(0.9047 0.0284 28.53);
@@ -298,7 +308,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   position:fixed;
   top:var(--gap);
   left:50%;
-  width:min(calc(100dvw - (2 * var(--gap))),45rem);
+  width:var(--ticket-w);
   height:calc(100dvh - (2 * var(--gap)));
   transform:translateX(-50%) translateY(24px);
   opacity:0;
@@ -409,11 +419,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .invitation-lotus-spacer { width:100%; flex:none; aspect-ratio:736 / 215; }
 .ganesh-mark { font-family:var(--font-invitation); font-size:1.7rem; line-height:1; color:var(--gold); }
 .invitation-blessing { font-family:var(--font-invitation); font-size:.72rem; font-weight:500; color:var(--invitation-muted); text-align:center; }
-.invitation-intro { display:flex; width:min(100%,30rem); flex-direction:column; align-items:center; gap:.45rem; font-family:var(--font-invitation); font-size:clamp(1.0625rem,4.4vw,1.2625rem); line-height:1.35; text-align:center; text-wrap:balance; }
+.invitation-intro { display:flex; width:min(100%,30rem); flex-direction:column; align-items:center; gap:.45rem; font-family:var(--font-invitation); font-size:clamp(1.0625rem,5.1cqw,1.2625rem); line-height:1.35; text-align:center; text-wrap:balance; }
 .invitation-family-title { font-weight:700; }
 .invitation-name { font-family:var(--font-script); font-size:clamp(37px,13.2cqw,70px); font-weight:400; line-height:.94; color:var(--invitation-ink); white-space:nowrap; }
 .invitation-name--groom { max-width:100%; }
-.invitation-family { width:min(100%,26rem); margin-top:.65rem; margin-inline:auto; font-family:var(--font-invitation); font-size:clamp(.9625rem,3.6vw,1.0825rem); line-height:1.52; color:var(--invitation-muted); text-align:center; text-wrap:balance; }
+.invitation-family { width:min(100%,26rem); margin-top:.65rem; margin-inline:auto; font-family:var(--font-invitation); font-size:clamp(.9625rem,4.2cqw,1.0825rem); line-height:1.52; color:var(--invitation-muted); text-align:center; text-wrap:balance; }
 .invitation-family p + p { margin-top:.22rem; }
 .invitation-ampersand { margin-block:-1rem; font-family:var(--font-script); font-size:2rem; line-height:1; color:var(--gold); }
 .lotus-top { --lotus-scale:.72; --lotus-lift:calc(-3% + 1px); --lotus-sway:3.5deg; position:absolute; inset:0 0 auto; z-index:2; width:100%; height:0; margin-top:var(--lotus-lift); pointer-events:none; }
@@ -455,12 +465,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
   mask-size:51% 51%;
   mask-repeat:no-repeat;
 }
-.count-card .num { display:block; font-family:var(--font-invitation); font-weight:500; font-size:clamp(2.6rem,10vw,5.25rem); line-height:.92; color:var(--foreground); font-variant-numeric:tabular-nums; }
+.count-card .num { display:block; font-family:var(--font-invitation); font-weight:500; font-size:clamp(2.6rem,11.6cqw,5.25rem); line-height:.92; color:var(--foreground); font-variant-numeric:tabular-nums; }
 .count-card .rule { display:block; width:2.25rem; height:1px; margin:1.1rem auto 0; background:var(--gold-soft); opacity:.55; }
 .count-card .lbl { display:block; margin-top:.85rem; font-size:.72rem; text-transform:uppercase; letter-spacing:.22em; color:var(--muted-foreground); }
 #event .section-heading { padding-top:0; }
 /* Countdown: nudge the bottom gold line up ~18px; otherwise equal-length like the other pages. */
-#event.page-pin { height:calc(var(--page-len) - 18px); }
+#event.page-pin { min-height:calc(var(--page-len) - 18px); }
 
 
 .checker-section,.checker-footer { position:relative; background:transparent; }
@@ -471,13 +481,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .page-footer { padding-top:var(--section-top); padding-bottom:max(56px,var(--section-bottom)); }
 /* Equal-length pages: pin a section to --page-len (gold line to gold line), content top-aligned for a
    consistent gap under the top gold line across pages. */
-.page-pin { height:var(--page-len); display:flex; flex-direction:column; justify-content:flex-start; }
+.page-pin { min-height:var(--page-len); display:flex; flex-direction:column; justify-content:flex-start; }
 /* Footer is a short closing note with no heading — centre it rather than top-align. */
 .page-pin.checker-footer { justify-content:center; }
 
 .foil-frame {
   position:relative;
-  padding-block:26px;
+  padding-block:1.625rem;
 }
 .foil-frame::before,
 .foil-frame::after {
@@ -505,18 +515,18 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 /* ============= Events ============= */
 .events-section { position:relative; background:transparent; }
-.event-card { position:relative; width:100%; margin-inline:0; height:var(--page-len); display:flex; flex-direction:column; }
-.event-card.foil-frame { padding:36px 12px; }
-.event-card .event-img-wrap { position:relative; overflow:hidden; border-radius:var(--radius-lg); flex:none; height:340px; }
+.event-card { position:relative; width:100%; margin-inline:0; min-height:var(--page-len); display:flex; flex-direction:column; }
+.event-card.foil-frame { padding:2.25rem .75rem; }
+.event-card .event-img-wrap { position:relative; overflow:hidden; border-radius:var(--radius-lg); flex:none; height:21.25rem; }
 .event-card .event-img-wrap img { display:block; width:100%; height:100%; object-fit:cover; }
 .event-card .event-img-wrap.event-img-wrap--art img { aspect-ratio:auto; height:100%; width:100%; object-fit:cover; }
-.event-text { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding-top:20px; padding-bottom:18px; }
+.event-text { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding-top:1.25rem; padding-bottom:1.125rem; }
 .event-title { display:flex; align-items:center; justify-content:center; min-height:2.3em; }
 .event-time__num { font-size:1.4em; }
 .font-script { font-family:"Playfair Display", "Great Vibes", cursive; }
 #events .section-heading { padding-top:0; margin-bottom:1.25rem; }
-@media (max-width: 767px) { .event-card .event-img-wrap img { aspect-ratio:4/3.6; } }
+/* (was max-width:767px) phone styles now apply at every window size */
+.event-card .event-img-wrap img { aspect-ratio:4/3.6; }
 
-@media (max-width: 767px) { .count-card { padding:1.4rem .5rem 1.2rem; } .count-card .rule { margin-top:.8rem; } .count-card .lbl { margin-top:.6rem; letter-spacing:.22em; } }
-@media (min-width: 768px) { .invitation-card { height:var(--page-len); } .invitation-copy { height:var(--page-len); padding-inline:2.5rem; } }
+  .count-card { padding:1.4rem .5rem 1.2rem; } .count-card .rule { margin-top:.8rem; } .count-card .lbl { margin-top:.6rem; letter-spacing:.22em; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; } }
