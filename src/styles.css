@@ -357,11 +357,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   padding-top:0;
 }
 .framed-invitation__scroll::-webkit-scrollbar { display:none; }
-.scroll-hint { position:absolute; left:50%; bottom:calc(2.5rem + 42px); z-index:2; display:flex; flex-direction:column; align-items:center; gap:.4rem; transform:translateX(-50%); pointer-events:none; opacity:0; transition:opacity .5s ease; font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; font-size:.95rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:#FFF8F0; text-shadow:0 1px 3px rgba(60,30,30,.55),0 0 8px rgba(60,30,30,.35); }
+.scroll-hint { position:absolute; left:50%; bottom:calc(2.5rem + 16px); z-index:2; display:flex; flex-direction:column; align-items:center; gap:.4rem; transform:translateX(-50%); pointer-events:none; opacity:0; transition:opacity .5s ease; font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; font-size:.95rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:#FFF8F0; text-shadow:0 1px 3px rgba(60,30,30,.55),0 0 8px rgba(60,30,30,.35); }
 .scroll-hint__hand { filter:drop-shadow(0 1px 3px rgba(60,30,30,.55)); }
 .scroll-hint--visible { opacity:1; }
 .scroll-hint__hand { width:2.25rem; height:2.25rem; animation:scroll-hint-swipe 1.6s ease-in-out infinite; }
-@keyframes scroll-hint-swipe { 0%,100% { transform:translateY(.6rem); } 50% { transform:translateY(-.9rem); } }
+@keyframes scroll-hint-swipe { 0%,100% { transform:translateY(.3rem); } 50% { transform:translateY(-.3rem); } }
 .framed-invitation__content { opacity:0; transform:translateY(12px); }
 .invitation-experience--transition .framed-invitation__content { animation:card-content-in .6s ease 1.4s forwards; }
 .invitation-experience--final .framed-invitation__content { opacity:1; transform:translateY(0); }
@@ -431,6 +431,16 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .invitation-family { width:min(100%,26rem); margin-top:.65rem; margin-inline:auto; font-family:var(--font-invitation); font-size:clamp(.9625rem,4.2cqw,1.0825rem); line-height:1.52; color:var(--invitation-muted); text-align:center; text-wrap:balance; }
 .invitation-family p + p { margin-top:.22rem; }
 .invitation-ampersand { margin-block:-1rem; font-family:var(--font-script); font-size:calc(clamp(37px,13.2cqw,70px) - 4pt); font-weight:400; line-height:.94; color:var(--gold); }
+.invitation-hashtag { font-family:var(--font-invitation); font-style:normal; font-weight:500; font-size:clamp(1.05rem,4.8cqw,1.3rem); line-height:1.2; letter-spacing:.04em; color:var(--gold); text-align:center; white-space:nowrap; }
+/* Equal paragraph spacing: every visible gap between paragraphs (blessing, intro, Jatin, "with", Priyal, hashtag)
+   is --para-gap. The cqw terms cancel each font's built-in leading, so the gaps are equal in ink, not just in boxes. */
+.invitation-text-area { --para-gap:clamp(18px,3.3svh,34px); justify-content:flex-start; gap:0; padding-top:6px; }
+.invitation-text-area > .invitation-intro { margin-top:calc(var(--para-gap) - 3.14cqw - 6px); }
+.invitation-text-area > .invitation-intro + .invitation-person { margin-top:calc(var(--para-gap) - .06cqw); }
+.invitation-text-area > .invitation-ampersand { margin-block:calc(var(--para-gap) + .56cqw) 0; }
+.invitation-text-area > .invitation-ampersand + .invitation-person { margin-top:calc(var(--para-gap) - .79cqw); }
+.invitation-text-area > .invitation-hashtag { margin-block:calc(var(--para-gap) - 1.95cqw) 0; }
+.invitation-text-area > .invitation-lotus-spacer { margin-top:auto; }
 .lotus-top { --lotus-scale:.72; --lotus-lift:calc(-3% + 1px); --lotus-sway:3.5deg; position:absolute; inset:0 0 auto; z-index:2; width:100%; height:0; margin-top:var(--lotus-lift); pointer-events:none; }
 .lotus-top__item { position:absolute; top:0; left:calc((var(--l) + var(--w) * (1 - var(--lotus-scale)) / 2) * 1%); width:calc(var(--w) * var(--lotus-scale) * 1%); transform-origin:top center; animation:floral-sway 5s ease-in-out var(--delay) infinite alternate; pointer-events:none; }
 .lotus-item--held { animation-play-state:paused; }

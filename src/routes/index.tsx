@@ -22,7 +22,13 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Priyal & Jatin — Wedding Invitation" },
       { property: "og:description", content: "Celebrate Priyal and Jatin at Praveg Lake Resort on December 12, 2026." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://jatinwedspriyal.vercel.app" },
+      { property: "og:image", content: "https://jatinwedspriyal.vercel.app/assets/og-image.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Priyal and Jatin's wedding invitation" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://jatinwedspriyal.vercel.app/assets/og-image.jpg" },
     ],
   }),
   component: Index,
@@ -753,8 +759,8 @@ function InvitationHero() {
     return () => window.clearTimeout(timeout);
   }, [step]);
 
-  // Text reveals in three beats, STAGE_GAP_S apart: Ganesh + family, Jatin (with "with"), then Priyal.
-  const stage = (base: string, n: 0 | 1 | 2) => ({
+  // Text reveals in four beats, STAGE_GAP_S apart: Ganesh + family, Jatin (with "with"), Priyal, then the hashtag.
+  const stage = (base: string, n: 0 | 1 | 2 | 3) => ({
     className: `${base} invitation-stage${textVisible ? " invitation-stage--in" : ""}`,
     style: { "--stage": n } as React.CSSProperties,
   });
@@ -788,6 +794,7 @@ function InvitationHero() {
               <p>D/o of Mr. Dinesh &amp; Mrs. Meenakshi Bang</p>
             </div>
           </div>
+          <div {...stage("invitation-hashtag", 3)}>#PriBookedByJatin</div>
           <div className="invitation-lotus-spacer" aria-hidden="true" />
           </div>
         </div>
