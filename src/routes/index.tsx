@@ -3,12 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { Hand, Heart, MapPin } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-const welcomeDinnerImageAsset = { url: "/media/welcome-dinner.webp" };
-const ringCeremonyImageAsset = { url: "/media/ring-ceremony.webp" };
-const haldiImageAsset = { url: "/media/haldi.webp" };
-const baraatImageAsset = { url: "/media/baraat.webp" };
-const receptionImageAsset = { url: "/media/reception.webp" };
-const phereImageAsset = { url: "/media/mandap.webp" };
+import { site, type EventItem } from "@/content/site";
 const introVideoWebm = { url: "/media/intro.webm" };
 const introVideoMp4 = { url: "/media/intro.mp4" };
 const ganpatiLogo = { url: "/media/ganpati-logo.svg" };
@@ -17,44 +12,28 @@ const lotusBottom = { url: "/media/lotus-bottom.png" };
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Priyal & Jatin — Wedding Invitation" },
-      { name: "description", content: "Celebrate Priyal and Jatin at Praveg Lake Resort on December 12, 2026." },
-      { property: "og:title", content: "Priyal & Jatin — Wedding Invitation" },
-      { property: "og:description", content: "Celebrate Priyal and Jatin at Praveg Lake Resort on December 12, 2026." },
+      { title: site.meta.title },
+      { name: "description", content: site.meta.description },
+      { property: "og:title", content: site.meta.title },
+      { property: "og:description", content: site.meta.description },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://jatinwedspriyal.vercel.app" },
-      { property: "og:image", content: "https://jatinwedspriyal.vercel.app/assets/og-image.jpg" },
+      { property: "og:url", content: site.siteUrl },
+      { property: "og:image", content: `${site.siteUrl}/assets/og-image.jpg` },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { property: "og:image:alt", content: "Priyal and Jatin's wedding invitation" },
+      { property: "og:image:alt", content: site.meta.imageAlt },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "https://jatinwedspriyal.vercel.app/assets/og-image.jpg" },
+      { name: "twitter:image", content: `${site.siteUrl}/assets/og-image.jpg` },
     ],
   }),
   component: Index,
 });
 
-const welcomeDinnerImage = welcomeDinnerImageAsset.url;
-const ringCeremonyImage = ringCeremonyImageAsset.url;
-const haldiImage = haldiImageAsset.url;
-const baraatImage = baraatImageAsset.url;
-const receptionImage = receptionImageAsset.url;
-const phereImage = phereImageAsset.url;
+const eventDays: EventItem[] = site.events;
 
-type EventItem = { image: string; alt: string; title: string; date: [string, string, string]; time: string; day: string; note?: string };
-
-const eventDays: EventItem[] = [
-  { image: welcomeDinnerImage, alt: "Lakeside welcome celebration", title: "Welcome Lunch", date: ["11", "12", "26"], time: "1 PM onwards", day: "Friday" },
-  { image: ringCeremonyImage, alt: "Rings on a lavender cushion", title: "Ring Ceremony & Sangeet", date: ["11", "12", "26"], time: "5 PM onwards", day: "Friday", note: "Followed by Cocktail Party" },
-  { image: haldiImage, alt: "Flower haldi seat with marigolds", title: "Phoolon Wali Haldi", date: ["12", "12", "26"], time: "10 AM onwards", day: "Saturday" },
-  { image: baraatImage, alt: "Baraat procession with dhol", title: "Baraat", date: ["12", "12", "26"], time: "6 PM onwards", day: "Saturday" },
-  { image: receptionImage, alt: "Candlelit reception by the lake", title: "Baraat Swagat & Reception", date: ["12", "12", "26"], time: "8 PM onwards", day: "Saturday" },
-  { image: phereImage, alt: "Mandap by the lake at night", title: "Phere", date: ["12", "12", "26"], time: "11 PM onwards", day: "Saturday" },
-];
-
-const COUNTDOWN_TARGET = new Date("2026-12-12T00:00:00+05:30").getTime();
-const ENVELOPE_SESSION_KEY = "priyal-jatin-envelope-opened";
-const MUSIC_SRC = "/media/fade-into-you.mp3";
+const COUNTDOWN_TARGET = new Date(site.countdown.target).getTime();
+const ENVELOPE_SESSION_KEY = site.envelopeKey;
+const MUSIC_SRC = site.music;
 const MUSIC_VOLUME = 0.45; // 0-1, final loudness
 const SCROLL_HINT_DELAY_MS = 3000; // idle time on page 1 before the "scroll down" hand appears
 const MUSIC_FADE_MS = 4000; // fade-in length after the envelope tap
@@ -365,7 +344,7 @@ function Countdown() {
           </div>
         ))}
       </div>
-      {remaining?.arrived && <p className="text-center font-display text-xl italic text-foreground/80 md:text-2xl">Today is the day — the lake is waiting.</p>}
+      {remaining?.arrived && <p className="text-center font-display text-xl italic text-foreground/80 md:text-2xl">{site.countdown.arrivedText}</p>}
     </div>
   );
 }
@@ -701,10 +680,7 @@ function EventCard({ item }: { item: EventItem }) {
   );
 }
 
-const FOOTER_LINES = [
-  "With hearts full of joy, we invite you to join us in celebrating love, laughter, and the start of a beautiful new chapter.",
-  "Your presence and blessings will make this celebration truly memorable.",
-];
+const FOOTER_LINES = site.footerLines;
 const FOOTER_REVEAL_THRESHOLD = 0.3; // fraction of the footer visible before the text rises in
 
 function InvitationFooter() {
@@ -759,7 +735,7 @@ function InvitationHero() {
     return () => window.clearTimeout(timeout);
   }, [step]);
 
-  // Text reveals in four beats, STAGE_GAP_S apart: Ganesh + family, Jatin (with "with"), Priyal, then the hashtag.
+  // Text reveals in four beats, STAGE_GAP_S apart: Ganesh + family, the first person (with the connector), the second person, then the hashtag.
   const stage = (base: string, n: 0 | 1 | 2 | 3) => ({
     className: `${base} invitation-stage${textVisible ? " invitation-stage--in" : ""}`,
     style: { "--stage": n } as React.CSSProperties,
@@ -775,26 +751,24 @@ function InvitationHero() {
         <div className="invitation-copy">
           <div {...stage("invitation-logo-zone", 0)}>
             <img src={ganpatiLogo.url} alt="" aria-hidden="true" className="h-auto w-12" />
-            <p className="invitation-blessing">|| Shri Ganeshay Namah ||</p>
+            <p className="invitation-blessing">{site.hero.blessing}</p>
           </div>
           <div className="invitation-text-area">
-          <div {...stage("invitation-intro", 0)}><p className="invitation-family-title">Mulchandani Family</p><p>Awaits your presence for the wedding celebrations of their beloved son</p></div>
+          <div {...stage("invitation-intro", 0)}><p className="invitation-family-title">{site.hero.familyTitle}</p><p>{site.hero.familyLine}</p></div>
           <div {...stage("invitation-person", 1)}>
-            <h1 className="invitation-name">Jatin</h1>
+            <h1 className="invitation-name">{site.hero.first.name}</h1>
             <div className="invitation-family">
-              <p>(Grand s/o Late Shri Hiranand<br />&amp; Smt. Ganeshidevi Mulchandani)</p>
-              <p>S/o Mr. Shyam &amp; Mrs. Aarti Mulchandani</p>
+              {site.hero.first.lines.map((line, i) => <p key={i}>{line}</p>)}
             </div>
           </div>
-          <div {...stage("invitation-ampersand", 1)}>with</div>
+          <div {...stage("invitation-ampersand", 1)}>{site.hero.connector}</div>
           <div {...stage("invitation-person", 2)}>
-            <h2 className="invitation-name invitation-name--groom">Priyal</h2>
+            <h2 className="invitation-name invitation-name--groom">{site.hero.second.name}</h2>
             <div className="invitation-family">
-              <p>(Grand d/o Late Shri Shankerlalji<br />&amp; Smt. Sitadevi Bang)</p>
-              <p>D/o of Mr. Dinesh &amp; Mrs. Meenakshi Bang</p>
+              {site.hero.second.lines.map((line, i) => <p key={i}>{line}</p>)}
             </div>
           </div>
-          <div {...stage("invitation-hashtag", 3)}>#PriBookedByJatin</div>
+          <div {...stage("invitation-hashtag", 3)}>{site.hero.hashtag}</div>
           <div className="invitation-lotus-spacer" aria-hidden="true" />
           </div>
         </div>
@@ -816,7 +790,7 @@ function Index() {
        {/* PAGE: Countdown — pinned to --page-len (850px), content centred. No other client cosmetic notes yet. */}
        <section id="event" className="foil-frame checker-section page-pin px-5 md:px-10"><div className="relative mx-auto max-w-5xl"><SectionHeading title="Counting the days..." />
         <Countdown />
-         <div className="mt-10 overflow-hidden rounded-lg border border-blush bg-card/60"><div className="px-3 py-7 text-center"><p className="whitespace-nowrap font-invitation text-[1.2rem]">11<sup className="ordinal">th</sup> &amp; 12<sup className="ordinal">th</sup> December, 2026</p></div></div>
+         <div className="mt-10 overflow-hidden rounded-lg border border-blush bg-card/60"><div className="px-3 py-7 text-center"><p className="whitespace-nowrap font-invitation text-[1.2rem]">{site.countdown.datesLine}</p></div></div>
       </div></section>
 
        {/* PAGES: Events — one 850px page per event (photo fills leftover space, object-fit:contain), pages butt
@@ -832,7 +806,7 @@ function Index() {
 
         {/* PAGE: Venue — pinned to --page-len (850px), content centred. No other client cosmetic notes yet. */}
         <section id="venue" className="foil-frame page-pin relative bg-transparent px-5 text-foreground md:px-10"><div className="relative mx-auto max-w-6xl"><SectionHeading title="The Venue" tone="dark" />
-         <div><p className="whitespace-nowrap text-center font-display text-[clamp(1.9rem,10.5cqw,3rem)] text-primary">Praveg Lake Resort</p><p className="mt-2 text-center font-display text-[1.563rem] font-bold tracking-[0.2em] text-foreground">Daman</p><div className="mt-6 flex justify-center"><Button asChild variant="outline" className="h-12 rounded-lg border-primary bg-primary px-7 uppercase tracking-[0.16em] text-primary-foreground hover:border-accent hover:bg-accent hover:text-accent-foreground"><a href="https://share.google/wXPgCUtC4Ho5l4KOc" target="_blank" rel="noopener noreferrer"><MapPin /> Get Directions</a></Button></div><div className="mt-8 py-4"><strong className="block text-[1.05rem] uppercase tracking-[0.18em] text-primary">Getting There</strong><ul className="mt-3 list-disc space-y-2 pl-5 text-left text-base text-muted-foreground"><li>Approximately 6 km from Vapi Railway Station</li><li>127 km from Surat International Airport via NH&nbsp;48</li><li>164 km from Mumbai International Airport</li></ul><div className="mt-[2.0625rem]"><strong className="block text-[1.05rem] uppercase tracking-[0.18em] text-primary">Accommodation</strong><p className="mt-2 text-lg text-muted-foreground">Check-in: 11/12/2026, 1 PM<br />Check-out: 13/12/2026, 10 AM</p></div></div></div>
+         <div><p className="whitespace-nowrap text-center font-display text-[clamp(1.9rem,10.5cqw,3rem)] text-primary">{site.venue.name}</p><p className="mt-2 text-center font-display text-[1.563rem] font-bold tracking-[0.2em] text-foreground">{site.venue.area}</p><div className="mt-6 flex justify-center"><Button asChild variant="outline" className="h-12 rounded-lg border-primary bg-primary px-7 uppercase tracking-[0.16em] text-primary-foreground hover:border-accent hover:bg-accent hover:text-accent-foreground"><a href={site.venue.directionsUrl} target="_blank" rel="noopener noreferrer"><MapPin /> Get Directions</a></Button></div><div className="mt-8 py-4"><strong className="block text-[1.05rem] uppercase tracking-[0.18em] text-primary">Getting There</strong><ul className="mt-3 list-disc space-y-2 pl-5 text-left text-base text-muted-foreground">{site.venue.gettingThere.map((item, i) => <li key={i}>{item}</li>)}</ul><div className="mt-[2.0625rem]"><strong className="block text-[1.05rem] uppercase tracking-[0.18em] text-primary">Accommodation</strong><p className="mt-2 text-lg text-muted-foreground">Check-in: {site.venue.checkIn}<br />Check-out: {site.venue.checkOut}</p></div></div></div>
       </div></section>
 
         {/* PAGE: Footer — pinned to --page-len (850px); the note is centred, so it sits in a tall panel. */}
