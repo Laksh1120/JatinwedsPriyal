@@ -574,3 +574,5 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
   .count-card { padding:1.4rem .5rem 1.2rem; } .count-card .rule { margin-top:.8rem; } .count-card .lbl { margin-top:.6rem; letter-spacing:.22em; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; } }
+/* No "The Events" title: the first event page sits directly under the countdown, so skip its duplicate top gold line. */
+.events-section--bare .event-card:first-child::before { display:none; }

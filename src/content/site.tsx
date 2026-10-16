@@ -15,11 +15,16 @@ export type EventItem = {
   note?: string;
 };
 
-export type Person = { name: string; lines: ReactNode[] };
+/** `shift` nudges the name sideways (in em) so the handwritten letters look centred, not just their boxes. */
+export type Person = { name: string; shift?: number; lines: ReactNode[] };
 
 export type SiteContent = {
   key: "groom" | "bride";
   siteUrl: string;
+  /** path of this version on its site ("" for the home page) */
+  path?: string;
+  /** false hides the "The Events" title above the event pages */
+  showEventsHeading?: boolean;
   meta: { title: string; description: string; imageAlt: string };
   /** sessionStorage key that remembers the envelope was opened */
   envelopeKey: string;
@@ -65,6 +70,7 @@ const jatin: Person = {
 
 const priyal: Person = {
   name: "Priyal",
+  shift: -0.057, // the P and the tail of the l sit slightly right of the text box
   lines: [
     <>(Grand d/o Late Shri Shankerlalji<br />&amp; Smt. Sitadevi Bang)</>,
     <>D/o of Mr. Dinesh &amp; Mrs. Meenakshi Bang</>,
@@ -138,6 +144,18 @@ export const bride: SiteContent = {
   events: events.filter((event) => event.title !== "Baraat"),
 };
 
+// Reception-only guests (bride's side): just "Baraat Swagat & Reception", no "The Events" title. Served at /wedding.
+export const brideReception: SiteContent = {
+  ...bride,
+  siteUrl: "https://priyalandjatin.vercel.app", // this version is shared as priyalandjatin.vercel.app/wedding
+  path: "/wedding",
+  showEventsHeading: false,
+  envelopeKey: "priyal-jatin-envelope-opened-bride-reception",
+  events: bride.events.filter((event) => event.title === "Baraat Swagat & Reception"),
+};
+
 const variant = (import.meta as unknown as { env?: { VITE_SITE?: string } }).env?.VITE_SITE;
 
-export const site: SiteContent = variant === "bride" ? bride : groom;
+export const isBrideSite = variant === "bride";
+
+export const site: SiteContent = isBrideSite ? bride : groom;
