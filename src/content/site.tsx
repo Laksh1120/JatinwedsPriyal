@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 // Which version a deployment shows is chosen at build time with the VITE_SITE environment variable:
 //   unset / "groom"  → the groom's side (jatinwedspriyal.vercel.app)
 //   "bride"          → the bride's side (priyalwedsjatin.vercel.app)
+//   "bride-reception"→ reception-only version at the home page (priyalandjatinwedding.vercel.app)
 
 export type EventItem = {
   image: string;
@@ -147,7 +148,7 @@ export const bride: SiteContent = {
 // Reception-only guests (bride's side): just "Baraat Swagat & Reception", no "The Events" title. Served at /wedding.
 export const brideReception: SiteContent = {
   ...bride,
-  siteUrl: "https://priyalandjatin.vercel.app", // this version is shared as priyalandjatin.vercel.app/wedding
+  siteUrl: "https://priyalandjatinwedding.vercel.app", // this version is shared as priyalandjatinwedding.vercel.app
   path: "/wedding",
   showEventsHeading: false,
   envelopeKey: "priyal-jatin-envelope-opened-bride-reception",
@@ -156,6 +157,10 @@ export const brideReception: SiteContent = {
 
 const variant = (import.meta as unknown as { env?: { VITE_SITE?: string } }).env?.VITE_SITE;
 
-export const isBrideSite = variant === "bride";
+/** true on both bride deployments (they also serve the /wedding page) */
+export const isBrideSite = variant === "bride" || variant === "bride-reception";
 
-export const site: SiteContent = isBrideSite ? bride : groom;
+// VITE_SITE=bride-reception: the whole site is the reception-only version, shown at the home page ("/").
+const brideReceptionHome: SiteContent = { ...brideReception, path: "" };
+
+export const site: SiteContent = variant === "bride-reception" ? brideReceptionHome : variant === "bride" ? bride : groom;
