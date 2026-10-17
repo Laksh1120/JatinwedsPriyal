@@ -46,8 +46,9 @@ export type SiteContent = {
     area: string;
     directionsUrl: string;
     gettingThere: ReactNode[];
-    checkIn: string;
-    checkOut: string;
+    /** leave both out to hide the Accommodation block */
+    checkIn?: string;
+    checkOut?: string;
   };
   footerLines: string[];
 };
@@ -139,7 +140,8 @@ export const bride: SiteContent = {
     familyLine: "Awaits your presence for the wedding celebrations of their beloved daughter",
     first: priyal,
     connector: "weds",
-    second: jatin,
+    // The J's hook starts further right than Priyal's P; nudge Jatin left so both names start at the same margin.
+    second: { ...jatin, shift: -0.18 },
   },
   // No separate Baraat page on the bride's side ("Baraat Swagat & Reception" stays).
   events: events.filter((event) => event.title !== "Baraat"),
@@ -153,6 +155,13 @@ export const brideReception: SiteContent = {
   showEventsHeading: false,
   envelopeKey: "priyal-jatin-envelope-opened-bride-reception",
   events: bride.events.filter((event) => event.title === "Baraat Swagat & Reception"),
+  // Reception-only guests do not need accommodation, and the only date that matters is the 12th.
+  venue: { ...bride.venue, checkIn: undefined, checkOut: undefined },
+  countdown: {
+    ...bride.countdown,
+    target: "2026-12-12T00:00:00+05:30",
+    datesLine: <>12<sup className="ordinal">th</sup> December, 2026</>,
+  },
 };
 
 const variant = (import.meta as unknown as { env?: { VITE_SITE?: string } }).env?.VITE_SITE;
